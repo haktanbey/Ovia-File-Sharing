@@ -1,0 +1,771 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Ovia — File Sharing</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='22' fill='%236c63ff'/><path d='M30 65 L50 35 L70 65' stroke='white' stroke-width='8' fill='none' stroke-linecap='round' stroke-linejoin='round'/><circle cx='50' cy='72' r='5' fill='white'/></svg>"/>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg:#0d0d12;--bg2:#13131a;--bg3:#1a1a24;--bg4:#21212e;
+  --border:#2a2a38;--text:#e8e8f0;--muted:#7878a0;
+  --accent:#6c63ff;--accent2:#a78bfa;
+  --green:#22d3a0;--red:#f87171;--amber:#fbbf24;
+  --radius:14px;--radius-sm:8px;
+  --font-head:'Syne',sans-serif;--font-body:'DM Sans',sans-serif;
+  --transition:.18s cubic-bezier(.4,0,.2,1);
+}
+html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--font-body);overflow:hidden}
+::-webkit-scrollbar{width:5px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:var(--border);border-radius:4px}
+
+#app{display:flex;height:100vh;overflow:hidden}
+#sidebar{width:240px;flex-shrink:0;background:var(--bg2);border-right:1px solid var(--border);display:flex;flex-direction:column;padding:20px 0}
+#content{flex:1;overflow-y:auto;display:flex;flex-direction:column}
+
+#logo{padding:0 24px 28px;font-family:var(--font-head);font-size:22px;font-weight:800;letter-spacing:-.5px}
+#logo span{color:var(--accent)}
+#logo small{display:block;font-size:10px;font-family:var(--font-body);color:var(--muted);font-weight:400;letter-spacing:2px;margin-top:2px}
+
+nav{flex:1;padding:0 12px}
+.nav-item{display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:var(--radius-sm);cursor:pointer;font-size:14px;font-weight:500;color:var(--muted);transition:all var(--transition);margin-bottom:2px}
+.nav-item:hover{background:var(--bg3);color:var(--text)}
+.nav-item.active{background:rgba(108,99,255,.18);color:var(--accent)}
+.nav-item svg{width:18px;height:18px;flex-shrink:0}
+.nav-sep{height:1px;background:var(--border);margin:12px 0}
+.nav-founder{display:none}
+
+#sidebar-bottom{padding:16px 12px}
+#user-chip{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:var(--radius-sm);background:var(--bg3);cursor:pointer;transition:background var(--transition)}
+#user-chip:hover{background:var(--bg4)}
+.chip-avatar{width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;flex-shrink:0;background:var(--accent);color:#fff;overflow:hidden}
+.chip-avatar img{width:100%;height:100%;object-fit:cover}
+.chip-info{min-width:0}
+.chip-name{font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:flex;align-items:center;gap:5px}
+.chip-role{font-size:11px;color:var(--muted)}
+.founder-badge{background:#f59e0b;color:#000;font-size:9px;font-weight:800;padding:1px 5px;border-radius:4px;letter-spacing:.5px}
+
+#topbar{display:flex;align-items:center;gap:12px;padding:16px 28px;border-bottom:1px solid var(--border);background:var(--bg2);flex-shrink:0;position:sticky;top:0;z-index:10}
+#search-wrap{flex:1;max-width:400px;position:relative}
+#search-input{width:100%;background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius-sm);padding:9px 14px 9px 38px;color:var(--text);font-family:var(--font-body);font-size:14px;outline:none;transition:border-color var(--transition)}
+#search-input:focus{border-color:var(--accent)}
+#search-icon{position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--muted)}
+.topbar-right{display:flex;align-items:center;gap:8px;margin-left:auto}
+
+.btn{display:inline-flex;align-items:center;gap:7px;padding:9px 18px;border-radius:var(--radius-sm);font-family:var(--font-body);font-size:14px;font-weight:500;cursor:pointer;border:none;transition:all var(--transition)}
+.btn-primary{background:var(--accent);color:#fff}.btn-primary:hover{filter:brightness(1.12)}
+.btn-outline{background:transparent;color:var(--text);border:1px solid var(--border)}.btn-outline:hover{background:var(--bg3);border-color:var(--muted)}
+.btn-danger{background:rgba(248,113,113,.15);color:var(--red);border:1px solid rgba(248,113,113,.25)}.btn-danger:hover{background:rgba(248,113,113,.25)}
+.btn-sm{padding:6px 13px;font-size:13px}
+.btn svg{width:16px;height:16px}
+
+#filter-tabs{display:flex;gap:6px;padding:16px 28px;border-bottom:1px solid var(--border);background:var(--bg2);flex-shrink:0}
+.ftab{padding:6px 14px;border-radius:20px;font-size:13px;cursor:pointer;border:1px solid var(--border);color:var(--muted);background:transparent;transition:all var(--transition)}
+.ftab:hover{border-color:var(--muted);color:var(--text)}
+.ftab.active{background:var(--accent);color:#fff;border-color:var(--accent)}
+
+.page{display:none;flex:1;padding:28px;animation:fadeUp .25s ease}
+.page.active{display:block}
+@keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.page-title{font-family:var(--font-head);font-size:24px;font-weight:800;margin-bottom:6px}
+.page-sub{color:var(--muted);font-size:14px;margin-bottom:24px}
+
+/* file grid */
+.files-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:16px}
+.file-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:18px;transition:all var(--transition);display:flex;flex-direction:column;gap:12px;animation:fadeUp .2s ease}
+.file-card:hover{border-color:var(--accent);transform:translateY(-2px);box-shadow:0 8px 30px rgba(108,99,255,.12)}
+.file-icon{width:48px;height:48px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0}
+.fc-header{display:flex;align-items:flex-start;gap:12px}
+.fc-name{font-size:14px;font-weight:600;word-break:break-all;line-height:1.4;flex:1}
+.fc-meta{font-size:12px;color:var(--muted);display:flex;gap:10px;flex-wrap:wrap}
+.fc-desc{font-size:13px;color:var(--muted);line-height:1.5}
+.fc-tags{display:flex;flex-wrap:wrap;gap:5px}
+.tag{padding:3px 9px;border-radius:20px;font-size:11px;background:var(--bg3);border:1px solid var(--border);color:var(--muted)}
+.fc-owner{display:flex;align-items:center;gap:7px;border-top:1px solid var(--border);padding-top:10px;margin-top:auto}
+.fc-avatar{width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0;overflow:hidden}
+.fc-avatar img{width:100%;height:100%;object-fit:cover}
+.fc-username{font-size:12px;color:var(--muted);display:flex;align-items:center;gap:4px}
+.fc-badge{background:#f59e0b;color:#000;font-size:8px;font-weight:800;padding:1px 4px;border-radius:3px}
+.fc-dl{margin-left:auto;font-size:11px;color:var(--muted)}
+.fc-actions{display:flex;gap:6px;margin-top:4px}
+
+/* upload */
+#upload-box{border:2px dashed var(--border);border-radius:var(--radius);padding:40px;text-align:center;cursor:pointer;transition:all var(--transition);margin-bottom:24px;background:var(--bg2);display:flex;flex-direction:column;align-items:center;justify-content:center}
+#upload-box:hover,#upload-box.drag{border-color:var(--accent);background:rgba(108,99,255,.05)}
+#upload-box svg{width:40px;height:40px;color:var(--muted);margin-bottom:12px}
+#upload-box p{color:var(--muted);font-size:14px}
+#upload-box strong{color:var(--accent)}
+#file-input{display:none}
+#upload-form{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:24px;display:none}
+#upload-form.visible{display:block;animation:fadeUp .2s ease}
+.form-group{margin-bottom:16px}
+.form-label{font-size:13px;color:var(--muted);margin-bottom:6px;display:block;font-weight:500}
+.form-input{width:100%;background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius-sm);padding:10px 14px;color:var(--text);font-family:var(--font-body);font-size:14px;outline:none;transition:border-color var(--transition)}
+.form-input:focus{border-color:var(--accent)}
+textarea.form-input{resize:vertical;min-height:80px}
+.selected-file-info{background:var(--bg3);border-radius:var(--radius-sm);padding:12px 16px;display:flex;align-items:center;gap:12px;margin-bottom:16px;border:1px solid var(--border)}
+#upload-progress{display:none;margin-top:12px}
+.prog-bar{height:4px;background:var(--border);border-radius:2px;overflow:hidden}
+.prog-fill{height:100%;background:var(--accent);border-radius:2px;width:0;transition:width .3s}
+
+/* modal */
+#modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.65);backdrop-filter:blur(8px);z-index:100;align-items:center;justify-content:center}
+#modal-overlay.open{display:flex}
+.modal{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:32px;width:100%;max-width:420px;animation:scaleIn .2s ease}
+@keyframes scaleIn{from{opacity:0;transform:scale(.95)}to{opacity:1;transform:scale(1)}}
+.modal-title{font-family:var(--font-head);font-size:22px;font-weight:800;margin-bottom:6px}
+.modal-sub{font-size:14px;color:var(--muted);margin-bottom:24px}
+.modal-tabs{display:flex;border-bottom:1px solid var(--border);margin-bottom:24px}
+.mtab{padding:10px 20px;font-size:14px;font-weight:500;cursor:pointer;color:var(--muted);border-bottom:2px solid transparent;transition:all var(--transition);margin-bottom:-1px}
+.mtab.active{color:var(--accent);border-bottom-color:var(--accent)}
+.error-msg{background:rgba(248,113,113,.12);color:var(--red);border:1px solid rgba(248,113,113,.25);border-radius:var(--radius-sm);padding:10px 14px;font-size:13px;margin-bottom:14px;display:none}
+.error-msg.show{display:block}
+
+/* profile */
+.profile-header{display:flex;align-items:flex-start;gap:24px;background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:28px;margin-bottom:24px;flex-wrap:wrap}
+.profile-avatar-big{width:90px;height:90px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:32px;font-weight:800;flex-shrink:0;overflow:hidden;border:3px solid var(--border)}
+.profile-avatar-big img{width:100%;height:100%;object-fit:cover}
+.profile-info h2{font-family:var(--font-head);font-size:22px;font-weight:800;display:flex;align-items:center;gap:8px}
+.profile-info p{color:var(--muted);font-size:14px;margin-top:4px;max-width:400px;line-height:1.5}
+.profile-stats{display:flex;gap:24px;margin-top:14px}
+.pstat-val{font-size:20px;font-weight:800;font-family:var(--font-head)}
+.pstat-lbl{font-size:11px;color:var(--muted)}
+
+/* settings */
+.settings-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:24px;margin-bottom:16px}
+.settings-title{font-size:15px;font-weight:700;margin-bottom:20px;display:flex;align-items:center;gap:8px}
+.color-grid{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px}
+.color-swatch{width:36px;height:36px;border-radius:50%;cursor:pointer;border:3px solid transparent;transition:all var(--transition)}
+.color-swatch.selected,.color-swatch:hover{border-color:#fff;transform:scale(1.1)}
+.avatar-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(56px,1fr));gap:10px;margin-bottom:16px}
+.avatar-opt{width:56px;height:56px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:22px;cursor:pointer;border:3px solid transparent;transition:all var(--transition);background:var(--bg3)}
+.avatar-opt.selected,.avatar-opt:hover{border-color:var(--accent);transform:scale(1.05)}
+
+/* photo upload area */
+.photo-upload-area{display:flex;align-items:center;gap:16px;margin-bottom:20px}
+.photo-preview{width:72px;height:72px;border-radius:50%;background:var(--bg3);border:2px dashed var(--border);display:flex;align-items:center;justify-content:center;font-size:28px;overflow:hidden;flex-shrink:0;cursor:pointer;transition:border-color var(--transition)}
+.photo-preview:hover{border-color:var(--accent)}
+.photo-preview img{width:100%;height:100%;object-fit:cover}
+.photo-actions{display:flex;flex-direction:column;gap:8px}
+.photo-hint{font-size:12px;color:var(--muted)}
+#photo-input{display:none}
+
+/* logs */
+.log-table{width:100%;border-collapse:collapse;font-size:13px}
+.log-table th{text-align:left;padding:10px 14px;color:var(--muted);font-weight:500;border-bottom:1px solid var(--border);font-size:11px;letter-spacing:1px;text-transform:uppercase}
+.log-table td{padding:10px 14px;border-bottom:1px solid var(--border);font-family:monospace}
+.log-table tr:hover td{background:var(--bg3)}
+.log-action{display:inline-flex;padding:3px 8px;border-radius:4px;font-size:11px;font-weight:600}
+.la-REGISTER{background:rgba(34,211,160,.15);color:#22d3a0}
+.la-LOGIN{background:rgba(108,99,255,.15);color:#a78bfa}
+.la-FILE_UPLOAD{background:rgba(251,191,36,.12);color:#fbbf24}
+.la-DOWNLOAD{background:rgba(148,163,184,.1);color:#94a3b8}
+.la-FILE_DELETE{background:rgba(248,113,113,.12);color:#f87171}
+.la-PROFILE_UPDATE{background:rgba(56,189,248,.12);color:#38bdf8}
+.la-PHOTO_UPLOAD{background:rgba(167,139,250,.12);color:#a78bfa}
+.la-FOUNDER_CREATED{background:rgba(245,158,11,.15);color:#f59e0b}
+.la-default{background:var(--bg3);color:var(--muted)}
+
+/* admin users */
+.user-table{width:100%;border-collapse:collapse;font-size:13px}
+.user-table th{text-align:left;padding:10px 14px;color:var(--muted);font-weight:500;border-bottom:1px solid var(--border);font-size:11px;letter-spacing:1px;text-transform:uppercase}
+.user-table td{padding:10px 14px;border-bottom:1px solid var(--border)}
+.user-table tr:hover td{background:var(--bg3)}
+
+/* toast */
+#toast{position:fixed;bottom:24px;right:24px;z-index:200;background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius-sm);padding:13px 20px;font-size:14px;min-width:220px;box-shadow:0 8px 32px rgba(0,0,0,.4);transform:translateY(20px);opacity:0;transition:all .25s ease;pointer-events:none}
+#toast.show{transform:translateY(0);opacity:1}
+#toast.ok{border-color:rgba(34,211,160,.4);color:#22d3a0}
+#toast.err{border-color:rgba(248,113,113,.4);color:#f87171}
+
+.empty{text-align:center;padding:60px 20px;color:var(--muted)}
+.empty svg{width:48px;height:48px;margin:0 auto 14px;display:block;opacity:.4}
+
+.section-title{font-family:var(--font-head);font-size:16px;font-weight:700;margin-bottom:16px}
+</style>
+</head>
+<body>
+<div id="toast"></div>
+
+<!-- AUTH MODAL -->
+<div id="modal-overlay">
+  <div class="modal">
+    <div class="modal-title">Ovia</div>
+    <div class="modal-sub">Dosya paylaşım platformuna hoş geldiniz</div>
+    <div class="modal-tabs">
+      <div class="mtab active" onclick="switchAuth('login')">Giriş Yap</div>
+      <div class="mtab" onclick="switchAuth('register')">Kayıt Ol</div>
+    </div>
+    <div id="auth-error" class="error-msg"></div>
+    <div id="form-login">
+      <div class="form-group"><label class="form-label">E-posta</label><input class="form-input" id="l-email" type="email" placeholder="ornek@mail.com"/></div>
+      <div class="form-group"><label class="form-label">Şifre</label><input class="form-input" id="l-pass" type="password" placeholder="••••••••" onkeydown="if(event.key==='Enter')doLogin()"/></div>
+      <button class="btn btn-primary" style="width:100%;justify-content:center" onclick="doLogin()">Giriş Yap</button>
+      <p style="text-align:center;margin-top:14px;font-size:13px;color:var(--muted)">Hesabın yok mu? <span style="color:var(--accent);cursor:pointer" onclick="switchAuth('register')">Kayıt ol</span></p>
+    </div>
+    <div id="form-register" style="display:none">
+      <div class="form-group"><label class="form-label">Kullanıcı adı</label><input class="form-input" id="r-user" type="text" placeholder="nexuser"/></div>
+      <div class="form-group"><label class="form-label">E-posta</label><input class="form-input" id="r-email" type="email" placeholder="ornek@mail.com"/></div>
+      <div class="form-group"><label class="form-label">Şifre</label><input class="form-input" id="r-pass" type="password" placeholder="En az 6 karakter" onkeydown="if(event.key==='Enter')doRegister()"/></div>
+      <button class="btn btn-primary" style="width:100%;justify-content:center" onclick="doRegister()">Hesap Oluştur</button>
+      <p style="text-align:center;margin-top:14px;font-size:13px;color:var(--muted)">Hesabın var mı? <span style="color:var(--accent);cursor:pointer" onclick="switchAuth('login')">Giriş yap</span></p>
+    </div>
+  </div>
+</div>
+
+<!-- APP -->
+<div id="app">
+  <div id="sidebar">
+    <div id="logo">Ov<span>ia</span><small>FİLE SHARİNG</small></div>
+    <nav>
+      <div class="nav-item active" onclick="showPage('feed')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>Keşfet
+      </div>
+      <div class="nav-item" onclick="showPage('upload')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>Yükle
+      </div>
+      <div class="nav-item" onclick="showPage('myfiles')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>Dosyalarım
+      </div>
+      <div class="nav-sep"></div>
+      <div class="nav-item" onclick="showPage('profile')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>Profilim
+      </div>
+      <div class="nav-item" onclick="showPage('settings')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>Ayarlar
+      </div>
+      <!-- KURUCU ALANI — sadece kurucuya görünür -->
+      <div class="nav-sep nav-founder"></div>
+      <div class="nav-item nav-founder" onclick="showPage('logs')" style="color:#f59e0b">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>Log Kayıtları ★
+      </div>
+      <div class="nav-item nav-founder" onclick="showPage('users')" style="color:#f59e0b">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>Kullanıcılar ★
+      </div>
+    </nav>
+    <div id="sidebar-bottom">
+      <div id="user-chip" onclick="showPage('profile')">
+        <div class="chip-avatar" id="chip-av">?</div>
+        <div class="chip-info">
+          <div class="chip-name" id="chip-name">Giriş yapılmadı</div>
+          <div class="chip-role" id="chip-role">Üye değil</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="content">
+    <div id="topbar">
+      <div id="search-wrap">
+        <svg id="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <input id="search-input" type="text" placeholder="Dosya ara..." oninput="loadFeed()"/>
+      </div>
+      <div class="topbar-right" id="auth-btn-area"></div>
+    </div>
+    <div id="filter-tabs">
+      <div class="ftab active" onclick="setFilter('')">Tümü</div>
+      <div class="ftab" onclick="setFilter('image')">🖼 Görsel</div>
+      <div class="ftab" onclick="setFilter('video')">🎬 Video</div>
+      <div class="ftab" onclick="setFilter('audio')">🎵 Ses</div>
+      <div class="ftab" onclick="setFilter('doc')">📄 Doküman</div>
+    </div>
+
+    <!-- FEED -->
+    <div class="page active" id="page-feed">
+      <div class="page-title">Keşfet</div>
+      <div class="page-sub">Topluluk tarafından paylaşılan dosyalar</div>
+      <div class="files-grid" id="files-grid"></div>
+    </div>
+
+    <!-- UPLOAD -->
+    <div class="page" id="page-upload">
+      <div class="page-title">Dosya Yükle</div>
+      <div class="page-sub">Topluluğa dosya paylaş</div>
+      <div id="upload-box" onclick="triggerFileInput()" ondragover="event.preventDefault();this.classList.add('drag')" ondragleave="this.classList.remove('drag')" ondrop="handleDrop(event)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+        <p><strong>Tıkla veya sürükle</strong> — maks. 50 MB</p>
+        <p style="margin-top:6px;font-size:12px">Her tür dosya desteklenir</p>
+      </div>
+      <input type="file" id="file-input" onchange="fileSelected(this.files[0])"/>
+      <div id="upload-form">
+        <div class="selected-file-info">
+          <span style="font-size:22px" id="sfi-icon">📄</span>
+          <div style="flex:1"><div style="font-size:14px;font-weight:600" id="sfi-name">—</div><div style="font-size:12px;color:var(--muted)" id="sfi-size">—</div></div>
+        </div>
+        <div class="form-group"><label class="form-label">Açıklama (isteğe bağlı)</label><textarea class="form-input" id="uf-desc" placeholder="Dosya hakkında kısa açıklama..."></textarea></div>
+        <div class="form-group"><label class="form-label">Etiketler (virgülle ayır)</label><input class="form-input" id="uf-tags" type="text" placeholder="tasarım, ui, figma"/></div>
+        <div id="upload-progress"><div class="prog-bar"><div class="prog-fill" id="prog-fill"></div></div><p style="font-size:12px;color:var(--muted);margin-top:6px;text-align:center">Yükleniyor...</p></div>
+        <div style="display:flex;gap:10px;margin-top:4px">
+          <button class="btn btn-primary" onclick="doUpload()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>Paylaş
+          </button>
+          <button class="btn btn-outline" onclick="cancelUpload()">İptal</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- MY FILES -->
+    <div class="page" id="page-myfiles">
+      <div class="page-title">Dosyalarım</div>
+      <div class="page-sub">Yüklediğin tüm dosyalar</div>
+      <div class="files-grid" id="my-files-grid"></div>
+    </div>
+
+    <!-- PROFILE -->
+    <div class="page" id="page-profile">
+      <div class="profile-header">
+        <div class="profile-avatar-big" id="pr-avatar"></div>
+        <div class="profile-info" style="flex:1">
+          <h2 id="pr-name">—</h2>
+          <p id="pr-bio" style="margin-top:6px">—</p>
+          <div class="profile-stats">
+            <div class="pstat"><div class="pstat-val" id="pr-files">0</div><div class="pstat-lbl">DOSYA</div></div>
+            <div class="pstat"><div class="pstat-val" id="pr-dls">0</div><div class="pstat-lbl">İNDİRME</div></div>
+            <div class="pstat"><div class="pstat-val" id="pr-joined">—</div><div class="pstat-lbl">KATILIM</div></div>
+          </div>
+        </div>
+        <button class="btn btn-outline btn-sm" onclick="showPage('settings')">Düzenle</button>
+      </div>
+      <div class="section-title">Paylaşımlarım</div>
+      <div class="files-grid" id="profile-files-grid"></div>
+    </div>
+
+    <!-- SETTINGS -->
+    <div class="page" id="page-settings">
+      <div class="page-title">Hesap Ayarları</div>
+      <div class="page-sub">Profilini özelleştir</div>
+
+      <!-- Profil Fotoğrafı -->
+      <div class="settings-card">
+        <div class="settings-title">📸 Profil Fotoğrafı</div>
+        <div class="photo-upload-area">
+          <div class="photo-preview" id="photo-preview" onclick="document.getElementById('photo-input').click()">
+            <span id="photo-preview-emoji" style="font-size:28px">📷</span>
+          </div>
+          <div class="photo-actions">
+            <button class="btn btn-outline btn-sm" onclick="document.getElementById('photo-input').click()">Fotoğraf Yükle</button>
+            <button class="btn btn-danger btn-sm" onclick="removePhoto()" id="remove-photo-btn" style="display:none">Fotoğrafı Kaldır</button>
+            <span class="photo-hint">JPG, PNG, WEBP · Maks. 5 MB</span>
+          </div>
+        </div>
+        <input type="file" id="photo-input" accept="image/*" onchange="uploadPhoto(this.files[0])"/>
+      </div>
+
+      <!-- Profil Bilgileri -->
+      <div class="settings-card">
+        <div class="settings-title">👤 Profil Bilgileri</div>
+        <div class="form-group"><label class="form-label">Kullanıcı adı</label><input class="form-input" id="s-username" type="text"/></div>
+        <div class="form-group"><label class="form-label">Bio</label><textarea class="form-input" id="s-bio" placeholder="Kendini anlat..."></textarea></div>
+        <button class="btn btn-primary btn-sm" onclick="saveProfile()">Kaydet</button>
+      </div>
+
+      <!-- Emoji Avatar -->
+      <div class="settings-card">
+        <div class="settings-title">😀 Emoji Avatar <span style="font-size:12px;font-weight:400;color:var(--muted)">(profil fotoğrafı yokken görünür)</span></div>
+        <div class="avatar-grid" id="avatar-grid"></div>
+      </div>
+
+      <!-- Renk -->
+      <div class="settings-card">
+        <div class="settings-title">🎨 Profil Rengi</div>
+        <div class="color-grid" id="color-grid"></div>
+      </div>
+
+      <!-- Çıkış -->
+      <div class="settings-card">
+        <div class="settings-title" style="color:var(--red)">⚠ Oturum</div>
+        <button class="btn btn-danger btn-sm" onclick="doLogout()">Çıkış Yap</button>
+      </div>
+    </div>
+
+    <!-- LOGS — SADECE KURUCU -->
+    <div class="page" id="page-logs">
+      <div class="page-title">Log Kayıtları <span style="font-size:14px;color:#f59e0b">★ Kurucu</span></div>
+      <div class="page-sub">Tüm sistem aktiviteleri</div>
+      <div style="background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden">
+        <table class="log-table">
+          <thead><tr><th>Zaman</th><th>İşlem</th><th>Detay</th></tr></thead>
+          <tbody id="log-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- USERS — SADECE KURUCU -->
+    <div class="page" id="page-users">
+      <div class="page-title">Kullanıcılar <span style="font-size:14px;color:#f59e0b">★ Kurucu</span></div>
+      <div class="page-sub">Kayıtlı tüm hesaplar</div>
+      <div style="background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden">
+        <table class="user-table">
+          <thead><tr><th>Kullanıcı</th><th>E-posta</th><th>Rol</th><th>Kayıt Tarihi</th></tr></thead>
+          <tbody id="users-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+let currentUser = null;
+let currentFilter = '';
+let selectedFile = null;
+
+const ACCENT_COLORS=['#6c63ff','#a78bfa','#22d3a0','#f87171','#fbbf24','#38bdf8','#fb7185','#34d399','#f97316','#e879f9'];
+const AVATARS=['🦊','🐺','🦁','🐉','🦅','👾','🤖','💀','🌙','⚡','🔥','🌊','🎭','🎯','💎','🚀','🎪','🎸'];
+
+(async()=>{
+  buildColorGrid(); buildAvatarGrid();
+  await checkAuth();
+  loadFeed();
+})();
+
+async function checkAuth(){
+  const r=await fetch('/api/auth/me');
+  if(r.ok){ const d=await r.json(); setUser(d.user); }
+  else openModal();
+}
+
+// ── auth ──────────────────────────────────────────────────────
+function openModal(){ document.getElementById('modal-overlay').classList.add('open'); }
+function closeModal(){ document.getElementById('modal-overlay').classList.remove('open'); }
+function switchAuth(tab){
+  document.querySelectorAll('.mtab').forEach((t,i)=>t.classList.toggle('active',i===(tab==='login'?0:1)));
+  document.getElementById('form-login').style.display=tab==='login'?'block':'none';
+  document.getElementById('form-register').style.display=tab==='register'?'block':'none';
+  document.getElementById('auth-error').classList.remove('show');
+}
+async function doLogin(){
+  const email=document.getElementById('l-email').value;
+  const password=document.getElementById('l-pass').value;
+  if(!email||!password) return showAuthErr('Tüm alanları doldur');
+  const r=await api('/api/auth/login','POST',{email,password});
+  if(r.error) return showAuthErr(r.error);
+  setUser(r.user); closeModal(); toast('Hoş geldin, '+r.user.username+'! 👋','ok');
+}
+async function doRegister(){
+  const username=document.getElementById('r-user').value.trim();
+  const email=document.getElementById('r-email').value.trim();
+  const password=document.getElementById('r-pass').value;
+  if(!username||!email||!password) return showAuthErr('Tüm alanları doldur');
+  if(password.length<6) return showAuthErr('Şifre en az 6 karakter olmalı');
+  const r=await api('/api/auth/register','POST',{username,email,password});
+  if(r.error) return showAuthErr(r.error);
+  setUser(r.user); closeModal(); toast('Hesabın oluşturuldu! 🎉','ok');
+}
+async function doLogout(){ await api('/api/auth/logout','POST'); currentUser=null; updateSidebar(); openModal(); showPage('feed'); }
+function showAuthErr(msg){ const el=document.getElementById('auth-error'); el.textContent=msg; el.classList.add('show'); }
+
+// ── set user ──────────────────────────────────────────────────
+function setUser(u){
+  currentUser=u;
+  document.documentElement.style.setProperty('--accent',u.accentColor||'#6c63ff');
+  updateSidebar();
+  updateAuthBtn();
+  populateSettings();
+  // kurucu menüsü
+  const founderEls=document.querySelectorAll('.nav-founder');
+  founderEls.forEach(el=>el.style.display=u.role==='founder'?'flex':'none');
+}
+function updateSidebar(){
+  const nameEl=document.getElementById('chip-name');
+  const roleEl=document.getElementById('chip-role');
+  const avEl=document.getElementById('chip-av');
+  if(currentUser){
+    const isFounder=currentUser.role==='founder';
+    nameEl.innerHTML=currentUser.username+(isFounder?' <span class="founder-badge">KURUCU</span>':'');
+    roleEl.textContent=(isFounder?'★ Platform Sahibi':'Üye')+' · '+new Date(currentUser.createdAt).toLocaleDateString('tr');
+    avEl.style.background=currentUser.accentColor||'#6c63ff';
+    if(currentUser.profilePhoto){ avEl.innerHTML=`<img src="${currentUser.profilePhoto}" alt=""/>`; }
+    else if(currentUser.avatar){ avEl.textContent=currentUser.avatar; avEl.style.fontSize='18px'; }
+    else{ avEl.textContent=currentUser.username.slice(0,1).toUpperCase(); avEl.style.fontSize='14px'; }
+  } else {
+    nameEl.textContent='Giriş yapılmadı'; roleEl.textContent='Üye değil'; avEl.textContent='?';
+  }
+}
+function updateAuthBtn(){
+  document.getElementById('auth-btn-area').innerHTML=currentUser
+    ?`<span style="font-size:13px;color:var(--muted)">@${currentUser.username}</span>`
+    :`<button class="btn btn-primary btn-sm" onclick="openModal()">Giriş Yap</button>`;
+}
+
+// ── pages ─────────────────────────────────────────────────────
+function showPage(id){
+  if(!currentUser&&['upload','myfiles','profile','settings','logs','users'].includes(id)){
+    toast('Bu sayfayı görmek için giriş yap','err'); openModal(); return;
+  }
+  if(['logs','users'].includes(id)&&currentUser?.role!=='founder'){
+    toast('Bu alan sadece kurucuya açık','err'); return;
+  }
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  document.getElementById('page-'+id)?.classList.add('active');
+  const navMap={feed:0,upload:1,myfiles:2,profile:3,settings:4};
+  if(navMap[id]!==undefined) document.querySelectorAll('.nav-item')[navMap[id]]?.classList.add('active');
+  document.getElementById('filter-tabs').style.display=id==='feed'?'flex':'none';
+  if(id==='myfiles') loadMyFiles();
+  if(id==='profile') loadProfile();
+  if(id==='logs')    loadLogs();
+  if(id==='users')   loadUsers();
+}
+
+// ── feed ──────────────────────────────────────────────────────
+function setFilter(f){
+  currentFilter=f;
+  document.querySelectorAll('.ftab').forEach(t=>t.classList.toggle('active',
+    (f===''&&t.textContent.includes('Tümü'))||(f!==''&&t.textContent.toLowerCase().includes({image:'görsel',video:'video',audio:'ses',doc:'doküman'}[f]||f))
+  ));
+  loadFeed();
+}
+async function loadFeed(){
+  const q=document.getElementById('search-input').value;
+  const d=await api(`/api/files?q=${encodeURIComponent(q)}&type=${currentFilter}`);
+  renderGrid('files-grid',d.files||[],{showOwner:true,canDelete:false});
+}
+async function loadMyFiles(){
+  const d=await api('/api/files/mine');
+  renderGrid('my-files-grid',d.files||[],{showOwner:false,canDelete:true});
+}
+async function loadProfile(){
+  if(!currentUser) return;
+  const d=await api('/api/files/mine');
+  const files=d.files||[];
+  const dls=files.reduce((s,f)=>s+f.downloads,0);
+  document.getElementById('pr-name').innerHTML=currentUser.username+(currentUser.role==='founder'?' <span style="background:#f59e0b;color:#000;font-size:11px;padding:2px 7px;border-radius:5px;font-weight:800">KURUCU</span>':'');
+  document.getElementById('pr-bio').textContent=currentUser.bio||'Henüz bio eklenmemiş.';
+  document.getElementById('pr-files').textContent=files.length;
+  document.getElementById('pr-dls').textContent=dls;
+  document.getElementById('pr-joined').textContent=new Date(currentUser.createdAt).toLocaleDateString('tr');
+  const av=document.getElementById('pr-avatar');
+  av.style.background=currentUser.accentColor||'#6c63ff';
+  av.style.color='#fff';
+  av.style.borderColor=currentUser.accentColor||'#6c63ff';
+  if(currentUser.profilePhoto) av.innerHTML=`<img src="${currentUser.profilePhoto}" alt=""/>`;
+  else if(currentUser.avatar){ av.textContent=currentUser.avatar; av.style.fontSize='34px'; }
+  else{ av.textContent=currentUser.username.slice(0,1).toUpperCase(); av.style.fontSize='28px'; }
+  renderGrid('profile-files-grid',files,{showOwner:false,canDelete:true});
+}
+async function loadLogs(){
+  const d=await api('/api/admin/logs');
+  if(d.error){ document.getElementById('log-tbody').innerHTML=`<tr><td colspan="3" style="color:var(--red);padding:20px;text-align:center">${d.error}</td></tr>`; return; }
+  const tbody=document.getElementById('log-tbody');
+  if(!d.logs?.length){ tbody.innerHTML='<tr><td colspan="3" style="text-align:center;color:var(--muted);padding:30px">Henüz log yok</td></tr>'; return; }
+  tbody.innerHTML=d.logs.map(line=>{
+    const m=line.match(/^\[([^\]]+)\]\s+(\S+)\s+\|\s+(.+)$/);
+    if(!m) return '';
+    const [,ts,action,data]=m;
+    const ac=action.trim();
+    const cls='la-'+ac;
+    let parsed={};try{parsed=JSON.parse(data);}catch{}
+    const detail=parsed.username||parsed.email||parsed.file||parsed.id||data;
+    return `<tr><td style="color:var(--muted);font-size:11px;white-space:nowrap">${ts.replace('T',' ').slice(0,19)}</td><td><span class="log-action ${cls}">${ac}</span></td><td>${esc(detail)}</td></tr>`;
+  }).join('');
+}
+async function loadUsers(){
+  const d=await api('/api/admin/users');
+  if(d.error){ document.getElementById('users-tbody').innerHTML=`<tr><td colspan="4" style="color:var(--red);padding:20px;text-align:center">${d.error}</td></tr>`; return; }
+  document.getElementById('users-tbody').innerHTML=(d.users||[]).map(u=>`
+    <tr>
+      <td style="display:flex;align-items:center;gap:8px">
+        <div style="width:28px;height:28px;border-radius:50%;background:${u.accentColor||'#6c63ff'};display:flex;align-items:center;justify-content:center;font-size:13px;overflow:hidden;flex-shrink:0">
+          ${u.profilePhoto?`<img src="${u.profilePhoto}" style="width:100%;height:100%;object-fit:cover"/>`:(u.avatar||u.username.slice(0,1).toUpperCase())}
+        </div>
+        <span style="font-weight:600">${esc(u.username)}</span>
+        ${u.role==='founder'?'<span style="background:#f59e0b;color:#000;font-size:9px;padding:1px 5px;border-radius:3px;font-weight:800">KURUCU</span>':''}
+      </td>
+      <td style="color:var(--muted)">${esc(u.email)}</td>
+      <td><span style="font-size:12px;padding:2px 8px;border-radius:4px;background:${u.role==='founder'?'rgba(245,158,11,.15)':'var(--bg3)'};color:${u.role==='founder'?'#f59e0b':'var(--muted)'}">${u.role}</span></td>
+      <td style="color:var(--muted);font-size:12px">${new Date(u.createdAt).toLocaleDateString('tr')}</td>
+    </tr>`).join('');
+}
+
+// ── file rendering ────────────────────────────────────────────
+function renderGrid(containerId,files,{showOwner=true,canDelete=false}={}){
+  const el=document.getElementById(containerId);
+  if(!files.length){ el.innerHTML=`<div class="empty" style="grid-column:1/-1"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg><p>Henüz dosya yok</p></div>`; return; }
+  el.innerHTML=files.map(f=>{
+    const icon=fileIcon(f.mimetype);
+    const size=fmtSize(f.size);
+    const date=new Date(f.createdAt).toLocaleDateString('tr');
+    const tags=(f.tags||[]).map(t=>`<span class="tag">#${t}</span>`).join('');
+    const isFounderOwner=f.ownerRole==='founder';
+    const avatarHtml=f.ownerPhoto
+      ?`<img src="${f.ownerPhoto}" alt=""/>`
+      :(f.ownerAvatar||f.ownerName.slice(0,1).toUpperCase());
+    const ownerSec=showOwner?`
+      <div class="fc-owner">
+        <div class="fc-avatar" style="background:${f.ownerAccent||'#6c63ff'};color:#fff">${avatarHtml}</div>
+        <span class="fc-username">@${esc(f.ownerName)}${isFounderOwner?' <span class="fc-badge">KURUCU</span>':''}</span>
+        <span class="fc-dl">⬇ ${f.downloads}</span>
+      </div>`:`<div class="fc-owner"><span class="fc-dl" style="margin-left:0">⬇ ${f.downloads} indirme</span></div>`;
+    const canDel=canDelete||(currentUser?.role==='founder');
+    const delBtn=canDel?`<button class="btn btn-danger btn-sm" onclick="deleteFile('${f.id}',event)">Sil</button>`:'';
+    return `<div class="file-card">
+      <div class="fc-header">
+        <div class="file-icon" style="background:${iconBg(f.mimetype)}">${icon}</div>
+        <div style="flex:1;min-width:0"><div class="fc-name">${esc(f.originalName)}</div><div class="fc-meta"><span>${size}</span><span>${date}</span></div></div>
+      </div>
+      ${f.description?`<div class="fc-desc">${esc(f.description)}</div>`:''}
+      ${tags?`<div class="fc-tags">${tags}</div>`:''}
+      ${ownerSec}
+      <div class="fc-actions">
+        <button class="btn btn-outline btn-sm" onclick="downloadFile('${f.id}','${esc(f.originalName)}')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>İndir
+        </button>${delBtn}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ── upload ────────────────────────────────────────────────────
+function triggerFileInput(){ document.getElementById('file-input').click(); }
+function handleDrop(e){
+  e.preventDefault();
+  document.getElementById('upload-box').classList.remove('drag');
+  const f=e.dataTransfer.files[0]; if(f) fileSelected(f);
+}
+function fileSelected(f){
+  if(!currentUser){ toast('Dosya yüklemek için giriş yap','err'); openModal(); return; }
+  if(!f) return;
+  selectedFile=f;
+  document.getElementById('sfi-icon').textContent=fileIcon(f.type);
+  document.getElementById('sfi-name').textContent=f.name;
+  document.getElementById('sfi-size').textContent=fmtSize(f.size);
+  document.getElementById('upload-box').style.display='none';
+  document.getElementById('upload-form').classList.add('visible');
+}
+function cancelUpload(){
+  selectedFile=null;
+  document.getElementById('upload-box').style.display='flex';
+  document.getElementById('upload-form').classList.remove('visible');
+  document.getElementById('file-input').value='';
+  document.getElementById('uf-desc').value='';
+  document.getElementById('uf-tags').value='';
+}
+async function doUpload(){
+  if(!selectedFile) return;
+  const form=new FormData();
+  form.append('file',selectedFile);
+  form.append('description',document.getElementById('uf-desc').value);
+  form.append('tags',document.getElementById('uf-tags').value);
+  document.getElementById('upload-progress').style.display='block';
+  const fill=document.getElementById('prog-fill');
+  let p=0; const iv=setInterval(()=>{p=Math.min(p+Math.random()*12,90);fill.style.width=p+'%';},200);
+  try{
+    const r=await fetch('/api/files/upload',{method:'POST',body:form});
+    clearInterval(iv); fill.style.width='100%';
+    if(r.ok){ setTimeout(()=>{ cancelUpload(); document.getElementById('upload-progress').style.display='none'; fill.style.width='0'; toast('Dosya paylaşıldı! 🚀','ok'); showPage('feed'); loadFeed(); },400); }
+    else{ const d=await r.json(); toast(d.error||'Yükleme başarısız','err'); clearInterval(iv); document.getElementById('upload-progress').style.display='none'; }
+  }catch{ toast('Sunucu hatası','err'); }
+}
+async function downloadFile(id,name){
+  const r=await api(`/api/files/${id}/download`);
+  if(r.url){ const a=document.createElement('a'); a.href=r.url; a.download=name; a.click(); toast('İndirme başladı ⬇','ok'); }
+}
+async function deleteFile(id,e){
+  e.stopPropagation();
+  if(!confirm('Bu dosyayı silmek istediğinden emin misin?')) return;
+  const r=await api(`/api/files/${id}`,'DELETE');
+  if(r.ok){ toast('Dosya silindi','ok'); loadMyFiles(); loadFeed(); }
+  else toast(r.error||'Silinemedi','err');
+}
+
+// ── profil fotoğrafı ──────────────────────────────────────────
+async function uploadPhoto(file){
+  if(!file) return;
+  if(file.size>5*1024*1024){ toast('Fotoğraf 5 MB\'dan büyük olamaz','err'); return; }
+  const form=new FormData();
+  form.append('photo',file);
+  toast('Fotoğraf yükleniyor...','ok');
+  const r=await fetch('/api/user/photo',{method:'POST',body:form});
+  const d=await r.json();
+  if(d.ok){ setUser(d.user); updatePhotoPreview(); toast('Profil fotoğrafı güncellendi ✓','ok'); }
+  else toast(d.error||'Yüklenemedi','err');
+}
+async function removePhoto(){
+  const r=await api('/api/user/photo','DELETE');
+  if(r.ok){ setUser(r.user); updatePhotoPreview(); toast('Fotoğraf kaldırıldı','ok'); }
+}
+function updatePhotoPreview(){
+  const prev=document.getElementById('photo-preview');
+  const btn=document.getElementById('remove-photo-btn');
+  if(currentUser?.profilePhoto){
+    prev.innerHTML=`<img src="${currentUser.profilePhoto}" alt="" style="width:100%;height:100%;object-fit:cover;border-radius:50%"/>`;
+    btn.style.display='flex';
+  } else {
+    prev.innerHTML=`<span id="photo-preview-emoji" style="font-size:28px">${currentUser?.avatar||'📷'}</span>`;
+    btn.style.display='none';
+  }
+}
+
+// ── settings ──────────────────────────────────────────────────
+function populateSettings(){
+  if(!currentUser) return;
+  document.getElementById('s-username').value=currentUser.username;
+  document.getElementById('s-bio').value=currentUser.bio||'';
+  document.querySelectorAll('.color-swatch').forEach(s=>s.classList.toggle('selected',s.dataset.color===currentUser.accentColor));
+  document.querySelectorAll('.avatar-opt').forEach(a=>a.classList.toggle('selected',a.dataset.av===currentUser.avatar));
+  updatePhotoPreview();
+}
+function buildColorGrid(){
+  document.getElementById('color-grid').innerHTML=ACCENT_COLORS.map(c=>`<div class="color-swatch" style="background:${c}" data-color="${c}" onclick="pickColor('${c}')"></div>`).join('');
+}
+function buildAvatarGrid(){
+  document.getElementById('avatar-grid').innerHTML=AVATARS.map(a=>`<div class="avatar-opt" data-av="${a}" onclick="pickAvatar('${a}')">${a}</div>`).join('');
+}
+function pickColor(c){
+  document.querySelectorAll('.color-swatch').forEach(s=>s.classList.toggle('selected',s.dataset.color===c));
+  if(currentUser){ currentUser.accentColor=c; document.documentElement.style.setProperty('--accent',c); }
+}
+function pickAvatar(a){
+  document.querySelectorAll('.avatar-opt').forEach(o=>o.classList.toggle('selected',o.dataset.av===a));
+  if(currentUser) currentUser.avatar=a;
+}
+async function saveProfile(){
+  const username=document.getElementById('s-username').value.trim();
+  const bio=document.getElementById('s-bio').value.trim();
+  const accent=document.querySelector('.color-swatch.selected')?.dataset.color||currentUser?.accentColor;
+  const avatar=document.querySelector('.avatar-opt.selected')?.dataset.av||currentUser?.avatar||'';
+  const r=await api('/api/user/profile','PATCH',{username,bio,accentColor:accent,avatar});
+  if(r.ok){ setUser(r.user); toast('Profil güncellendi ✓','ok'); }
+  else toast(r.error||'Hata','err');
+}
+
+// ── utils ──────────────────────────────────────────────────────
+async function api(url,method='GET',body){
+  const opts={method,headers:{}};
+  if(body){opts.headers['Content-Type']='application/json';opts.body=JSON.stringify(body);}
+  try{ const r=await fetch(url,opts); return await r.json(); }
+  catch{ return{error:'Ağ hatası'}; }
+}
+function toast(msg,type='ok'){
+  const el=document.getElementById('toast');
+  el.textContent=msg; el.className='show '+(type==='ok'?'ok':'err');
+  clearTimeout(el._t); el._t=setTimeout(()=>el.className='',3000);
+}
+function fileIcon(m=''){
+  if(m.startsWith('image/')) return '🖼';
+  if(m.startsWith('video/')) return '🎬';
+  if(m.startsWith('audio/')) return '🎵';
+  if(m.includes('pdf'))      return '📕';
+  if(m.includes('zip')||m.includes('rar')) return '🗜';
+  if(m.includes('text'))     return '📝';
+  if(m.includes('sheet')||m.includes('excel')) return '📊';
+  return '📄';
+}
+function iconBg(m=''){
+  if(m.startsWith('image/')) return 'rgba(56,189,248,.15)';
+  if(m.startsWith('video/')) return 'rgba(251,191,36,.15)';
+  if(m.startsWith('audio/')) return 'rgba(167,139,250,.15)';
+  if(m.includes('pdf'))      return 'rgba(248,113,113,.15)';
+  return 'rgba(108,99,255,.15)';
+}
+function fmtSize(b){
+  if(b>1e9) return (b/1e9).toFixed(1)+' GB';
+  if(b>1e6) return (b/1e6).toFixed(1)+' MB';
+  if(b>1e3) return (b/1e3).toFixed(0)+' KB';
+  return b+' B';
+}
+function esc(s=''){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+</script>
+</body>
+</html>

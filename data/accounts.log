@@ -1,0 +1,21 @@
+[2026-04-25T08:50:47.552Z] REGISTER             | {"id":"94b3c4a0-4dcf-4dec-a1e2-cf2341a536a1","username":"123123","email":"123123","ip":"::1"}
+[2026-04-25T08:51:07.122Z] FILE_UPLOAD          | {"id":"6684258a-b3b3-44de-846c-3603037b90e1","file":"Claude Setup.exe","owner":"94b3c4a0-4dcf-4dec-a1e2-cf2341a536a1","size":6942880}
+[2026-04-25T08:51:24.326Z] DOWNLOAD             | {"id":"6684258a-b3b3-44de-846c-3603037b90e1","file":"Claude Setup.exe"}
+[2026-04-25T08:52:01.024Z] FILE_DELETE          | {"id":"6684258a-b3b3-44de-846c-3603037b90e1","file":"Claude Setup.exe","owner":"94b3c4a0-4dcf-4dec-a1e2-cf2341a536a1"}
+[2026-04-25T08:52:54.137Z] PROFILE_UPDATE       | {"id":"94b3c4a0-4dcf-4dec-a1e2-cf2341a536a1","username":"Katreos"}
+[2026-04-25T08:52:55.334Z] PROFILE_UPDATE       | {"id":"94b3c4a0-4dcf-4dec-a1e2-cf2341a536a1","username":"Katreos"}
+[2026-04-25T09:03:08.180Z] FOUNDER_CREATED      | {"username":"Haktan"}
+[2026-04-25T09:03:35.753Z] LOGIN                | {"id":"79a4dd69-de26-4d35-872e-73ee1d61aeaa","username":"Haktan","role":"founder","ip":"::1"}
+[2026-04-25T09:05:56.438Z] REGISTER             | {"id":"dc15417b-5cdd-4fe3-8c68-c08078343455","username":"neux","email":"123","ip":"::1"}
+[2026-04-25T09:10:39.459Z] LOGIN_FAIL           | {"email":"haktan@nexdrop.com","ip":"::1"}
+[2026-04-25T09:10:43.007Z] LOGIN                | {"id":"79a4dd69-de26-4d35-872e-73ee1d61aeaa","username":"Haktan","role":"founder","ip":"::1"}
+[2026-04-25T09:11:09.423Z] PHOTO_UPLOAD         | {"id":"79a4dd69-de26-4d35-872e-73ee1d61aeaa","username":"Haktan"}
+[2026-04-25T09:11:14.835Z] PHOTO_UPLOAD         | {"id":"79a4dd69-de26-4d35-872e-73ee1d61aeaa","username":"Haktan"}
+[2026-04-25T09:11:20.745Z] PHOTO_UPLOAD         | {"id":"79a4dd69-de26-4d35-872e-73ee1d61aeaa","username":"Haktan"}
+[2026-04-25T09:19:07.703Z] PHOTO_UPLOAD         | {"id":"79a4dd69-de26-4d35-872e-73ee1d61aeaa","username":"Haktan"}
+[2026-04-25T09:20:16.189Z] FILE_UPLOAD          | {"id":"64d64d32-3d48-4615-86ad-269e513e4246","file":"standard.gif","size":2494986,"owner":"Haktan"}
+[2026-04-25T09:20:20.984Z] DOWNLOAD             | {"file":"standard.gif"}
+[2026-04-25T09:23:42.836Z] FILE_DELETE          | {"file":"standard.gif","deletedBy":"Haktan"}
+[2026-04-25T09:28:16.753Z] FILE_UPLOAD          | {"id":"6c93640b-2aa0-4d56-85ee-10b3bcbc24c1","file":"beleza.mp3","size":2933445,"owner":"Haktan"}
+[2026-04-25T09:33:09.360Z] LOGIN                | {"id":"79a4dd69-de26-4d35-872e-73ee1d61aeaa","username":"Haktan","role":"founder","ip":"::1"}
+[2026-04-25T09:34:07.463Z] PROFILE_UPDATE       | {"id":"79a4dd69-de26-4d35-872e-73ee1d61aeaa","username":"Haktan"}

@@ -1,0 +1,36 @@
+[
+  {
+    "id": "79a4dd69-de26-4d35-872e-73ee1d61aeaa",
+    "username": "Haktan",
+    "email": "haktan@nexdrop.com",
+    "password": "$2a$10$w//Z.KRDEyvLdTFl7lHU/.alW.REhV6TRstgw.oY7OJWAwFPOhX8K",
+    "role": "founder",
+    "avatar": "👑",
+    "profilePhoto": "",
+    "bio": "Ovia Kurucusu",
+    "accentColor": "#f59e0b",
+    "createdAt": "2026-04-25T09:03:08.179Z"
+  },
+  {
+    "id": "94b3c4a0-4dcf-4dec-a1e2-cf2341a536a1",
+    "username": "Katreos",
+    "email": "123123",
+    "password": "$2a$10$eD9XNG8O2IMu0RaHc/a0qe3o3zZCxVkaaRaWfQoG9v2bmNPYjbZwq",
+    "avatar": "💎",
+    "bio": "Yazılım Uzmanı",
+    "accentColor": "#6c63ff",
+    "createdAt": "2026-04-25T08:50:47.552Z"
+  },
+  {
+    "id": "dc15417b-5cdd-4fe3-8c68-c08078343455",
+    "username": "neux",
+    "email": "123",
+    "password": "$2a$10$CqVuejXEIU2/WaPVxodhteNUHQx32kOEKjKMJUAEBDVfGHVRzxp3a",
+    "role": "user",
+    "avatar": "",
+    "profilePhoto": "",
+    "bio": "",
+    "accentColor": "#6c63ff",
+    "createdAt": "2026-04-25T09:05:56.437Z"
+  }
+]
